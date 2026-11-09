@@ -36,9 +36,30 @@ Cada aba mensal tem duas colunas de controle:
 - **Proteção contra zero à esquerda.** O Sheets converte CPF, contrato e telefone em número e apaga os zeros do começo. As colunas são fixadas como Texto Simples, e um CPF que já chegou sem o zero é recusado com uma mensagem explicando como corrigir.
 - **Imagens em paralelo.** As fotos anexadas no Forms são baixadas numa única chamada (`UrlFetchApp.fetchAll`) e reduzidas pela miniatura do Drive, o que deixou cada PDF bem mais leve.
 
+## Formulário
+
+O Google Forms tem 8 perguntas, que precisam ficar nesta ordem porque o script lê a planilha por posição:
+
+| Coluna | Pergunta | Tipo |
+|---|---|---|
+| A | Carimbo de data/hora | preenchido pelo Forms |
+| B | Nome completo | resposta curta |
+| C | CPF (somente números) | resposta curta |
+| D | Nº do contrato (somente números, 13 dígitos) | resposta curta |
+| E | Endereço | resposta curta |
+| F | Telefone para contato | resposta curta |
+| G | Condomínio e apartamento | resposta curta |
+| H | Motivo da reclamação | resposta curta |
+| I | Fotos do problema | upload de arquivo |
+| J | *(reservada, sem pergunta)* | fica vazia |
+| K | STATUS | escrita pelo script |
+| L | RESOLVIDO | checkbox criado pelo script |
+
+A coluna J é lida como "fotos do contrato", que hoje não existe no formulário. Ela fica vazia e mantém o STATUS na coluna K, onde as planilhas em produção já guardam o histórico.
+
 ## Configuração
 
-1. Crie o Google Forms e vincule a uma planilha. As colunas esperadas, na ordem, são: data/hora, nome completo, CPF, nº do contrato, endereço, telefone, condomínio/apto, descrição do problema, fotos do problema e fotos do contrato.
+1. Crie o formulário com as perguntas da tabela acima e vincule a uma planilha.
 2. Na planilha, abra **Extensões → Apps Script** e cole o conteúdo de [`Code.gs`](Code.gs).
 3. Em **Configurações do projeto (engrenagem) → Propriedades do script**, cadastre:
 
