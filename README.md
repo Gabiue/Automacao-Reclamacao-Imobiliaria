@@ -34,6 +34,7 @@ Cada aba mensal tem duas colunas de controle:
 - **Só processa o que acabou de chegar.** O processamento automático recebe a lista exata de linhas criadas pelo trigger, então o histórico antigo nunca é reenviado por engano.
 - **Lock na organização das abas** (`LockService`), para duas respostas quase simultâneas não mexerem na caixa de entrada ao mesmo tempo.
 - **Proteção contra zero à esquerda.** O Sheets converte CPF, contrato e telefone em número e apaga os zeros do começo. As colunas são fixadas como Texto Simples, e um CPF que já chegou sem o zero é recusado com uma mensagem explicando como corrigir.
+- **Entrada do formulário tratada como não confiável.** Todo texto é escapado antes de entrar no HTML do PDF, para ninguém conseguir adulterar o termo digitando tags. Respostas que começam com `=`, `+`, `-` ou `@` são gravadas como texto, porque o `setValues` as transformaria em fórmula (ex: um `=IMPORTXML` enviando os CPFs da planilha para fora).
 - **Imagens em paralelo.** As fotos anexadas no Forms são baixadas numa única chamada (`UrlFetchApp.fetchAll`) e reduzidas pela miniatura do Drive, o que deixou cada PDF bem mais leve.
 
 ## Formulário

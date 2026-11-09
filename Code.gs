@@ -459,7 +459,7 @@ function organizarRespostasPorMes() {
 
       const nomeAba = nomeAbaDoMes(dataRef, fusoHorario);
       if (!grupos[nomeAba]) grupos[nomeAba] = [];
-      grupos[nomeAba].push(linha);
+      grupos[nomeAba].push(linha.map(neutralizarFormula));
     });
 
     let totalMovidas = 0;
@@ -818,16 +818,16 @@ function gerarPDF(dados, imagens) {
       <h1>TERMO DE MANUTENÇÃO DE IMÓVEL</h1>
 
       <table>
-        <tr><td><strong>SOLICITANTE:</strong> ${dados.nomeCompleto}</td><td><strong>CPF:</strong> ${dados.cpf}</td></tr>
-        <tr><td><strong>Nº CONTRATO:</strong> ${dados.numeroContrato}</td><td><strong>APTO:</strong> ${dados.condominioApartamento || '---'}</td></tr>
-        <tr><td><strong>ENDEREÇO:</strong> ${dados.endereco}</td><td><strong>CONDOMÍNIO:</strong> ${dados.condominioApartamento || '---'}</td></tr>
-        <tr><td><strong>CONTATO:</strong> ${dados.telefone || '---'}</td><td><strong>DT PEDIDO:</strong> ${formatarDataBR(dados.timestamp)}</td></tr>
+        <tr><td><strong>SOLICITANTE:</strong> ${escaparHTML(dados.nomeCompleto)}</td><td><strong>CPF:</strong> ${escaparHTML(dados.cpf)}</td></tr>
+        <tr><td><strong>Nº CONTRATO:</strong> ${escaparHTML(dados.numeroContrato)}</td><td><strong>APTO:</strong> ${escaparHTML(dados.condominioApartamento || '---')}</td></tr>
+        <tr><td><strong>ENDEREÇO:</strong> ${escaparHTML(dados.endereco)}</td><td><strong>CONDOMÍNIO:</strong> ${escaparHTML(dados.condominioApartamento || '---')}</td></tr>
+        <tr><td><strong>CONTATO:</strong> ${escaparHTML(dados.telefone || '---')}</td><td><strong>DT PEDIDO:</strong> ${formatarDataBR(dados.timestamp)}</td></tr>
       </table>
 
       <div>
         <p><strong>MOTIVO DA RECLAMAÇÃO</strong></p>
         <ul>
-          <li>${dados.descricaoProblema}</li>
+          <li>${escaparHTML(dados.descricaoProblema)}</li>
         </ul>
       </div>
 
@@ -844,7 +844,7 @@ function gerarPDF(dados, imagens) {
       <div class="assinaturas">
         <div class="linha-assinatura">PROFISSIONAL CONSTRUTORA</div>
         <br><br>
-        <div class="linha-assinatura">${dados.nomeCompleto}</div>
+        <div class="linha-assinatura">${escaparHTML(dados.nomeCompleto)}</div>
       </div>
     </body>
   </html>`;
@@ -1018,6 +1018,22 @@ function validarCPF(cpf) {
 function formatarContrato(contrato) {
   const numeros = contrato.toString().replace(/\D/g, '');
   return `${numeros.substr(0,1)}.${numeros.substr(1,4)}.${numeros.substr(5,7)}-${numeros.substr(12,1)}`;
+}
+
+// Texto do formulário vai dentro do HTML do PDF: sem escapar, "<h1>..." viraria tag e adulteraria o termo.
+function escaparHTML(valor) {
+  return String(valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// setValues transforma texto iniciado por = + - @ em fórmula (ex: =IMPORTXML vazando CPFs).
+// O apóstrofo força texto e não aparece na célula nem no getValues.
+function neutralizarFormula(valor) {
+  return (typeof valor === 'string' && /^[=+\-@]/.test(valor)) ? "'" + valor : valor;
 }
 
 function extrairLinks(texto) {
